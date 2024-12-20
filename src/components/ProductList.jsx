@@ -9,16 +9,18 @@ import useSWR from 'swr'
 import ProductRow from './ProductRow'
 import ProductEmptySpace from './ProductEmptySpace'
 import { debounce } from 'lodash'
+import Pagin from './Pagin'
 
 
 const ProductList = () => {
+ 
   const [search,setSearch] = useState("");
   const fetcher = (...args) => fetch(...args).then(res => res.json())
-  const { data, error, isLoading } = useSWR(search?(import.meta.env.VITE_BASE_URL+"/products?q="+search):(import.meta.env.VITE_BASE_URL+"/products"), fetcher);
+  const { data, error, isLoading } = useSWR(search?(search):(import.meta.env.VITE_BASE_URL+"/products"), fetcher);
   const handleSearch = debounce((value)=>{
-   setSearch(value.target.value)
+   setSearch(import.meta.env.VITE_BASE_URL+"/products?q="+value.target.value)
   },500)
-
+console.log(data)
   return (
     <div className='mt-5'>
         <div className=' flex justify-between items-center mb-3'>
@@ -76,7 +78,7 @@ const ProductList = () => {
           </Table.Row>):(
           data.length===0?(<ProductEmptySpace/>):
             (data.data.map(product=>
-              (<ProductRow key={product.id} product={product}/>)
+              (<ProductRow  key={product.id} product={product} />)
             
           ))
           
@@ -88,6 +90,7 @@ const ProductList = () => {
          
         </Table.Body>
       </Table>
+      {!isLoading ? (<Pagin links={data.links} meta={data.meta} setUrl={setSearch}/>):(<div></div>)}
     </div>
   )
 }
